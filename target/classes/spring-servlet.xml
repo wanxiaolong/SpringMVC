@@ -1,0 +1,58 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd">
+            
+    <mvc:annotation-driven />
+
+    <context:component-scan base-package="com.augmentum.fleet.web" />
+    
+    <bean id="propertyConfigurer"
+        class="com.augmentum.fleet.web.common.CustomizedPropertyPlaceholderConfigurer">
+        <property name="location">
+            <value>classpath:thriftServer.properties</value>    
+        </property>
+    </bean>
+    
+    <!-- Application manager -->
+    <bean id="fleetWebPostProcessor" class="com.augmentum.fleet.web.common.FleetWebPostProcessor">
+        <property name="profileName" value="Web" />
+        <property name="configurationServerHost" value="${ConfigurationServerHost}" />
+    </bean>
+    
+    <bean id="dataSource"  
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource">  
+        <property name="driverClassName"  
+            value="${jdbcDriverClassName}">  
+        </property>  
+        <property name="url"  
+            value="${jdbcCustomerDBUrl}">
+        </property>  
+        <property name="username" value="${username}" />
+        <property name="password" value="${password}" />
+    </bean>  
+    <bean id="jasperReportsViewResolver" class="com.augmentum.fleet.web.view.FleetReportsViewResolver">
+        <property name="order" value="0"/>
+        <property name="viewClass" value="com.augmentum.fleet.web.view.FleetReportsView"/>
+        <property name="prefix" value="/WEB-INF/jasper/"/>
+        <property name="suffix" value=".jasper"/>
+        <property name="viewNames" value="*Report"/>
+        <property name="cache" value="false"/>
+        <property name="jdbcDataSource" ref="dataSource"/> 
+    </bean>
+
+
+	<mvc:default-servlet-handler />
+ 
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/rest/**"/>
+            <bean class="com.augmentum.fleet.web.security.SecurityInterceptor"></bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>
